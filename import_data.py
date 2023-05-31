@@ -4,7 +4,7 @@ from mysql import connector
 from datetime import datetime
 
 FILE = 'openfoodfacts/csv/openfoodfacts_export.csv'
-INSERT = "INSERT INTO challenge_open_food.products (code, status, imported_t, url, creator, created_t, last_modified_t, url, product_name, quantity, brands, categories, labels, cities, purchase_places, stores, ingredients_text, traces, serving_size, serving_quantity, nutriscore_score, nutriscore_grade, main_category, image_url) "
+INSERT = "INSERT INTO challenge_open_food.products (code, status, imported_t, url, creator, created_t, last_modified_t, product_name, quantity, brands, categories, labels, cities, purchase_places, stores, ingredients_text, traces, serving_size, serving_quantity, nutriscore_score, nutriscore_grade, main_category, image_url) "
 
 def envs_database_mysql():
     return dotenv_values(".env")
@@ -18,12 +18,13 @@ def query_database_mysql(sql, val):
         database=config['DATABASE']
     )
 
+    val = str(val).replace('}','').replace('{','').replace('[','').replace(']','')
     print("{} VALUES ({})".format(sql, val))
     # cur = connection.cursor()
-    # query_database = cur.execute("{} VALUES ({})".format(sql, values))
+    # query_database = cur.execute("{} VALUES ({})".format(sql, val))
     # result = cur.fetchone()
     # connection.close()
-    #return result
+    return 'result'
 
 def read_import_csv():
     arr = []
@@ -38,8 +39,8 @@ def read_import_csv():
                 imported_t = datetime.now()
                 url = "https://world.openfoodfacts.org/product/{}".format(code)
                 creator = "securita"
-                created_t = datetime.now()
-                last_modified_t = datetime.now()
+                created_t = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+                last_modified_t = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
                 product_name = ' '.join(line.decode('UTF-8').split(' ')[29:35])
                 quantity = ' '.join(line.decode('UTF-8').split(' ')[16::17])
                 brands =  ' '.join(line.decode('UTF-8').split(' ')[21:22])
@@ -58,7 +59,7 @@ def read_import_csv():
                 image_url = "https://static.openfoodfacts.org/images/products/{}/front_pt.5.400.jpg".format(code)
                 values.append(
                     {
-                        code, status, imported_t, url, creator, last_modified_t, product_name, quantity, brands,
+                        code, status, imported_t, url, creator, created_t, last_modified_t, product_name, quantity, brands,
                         categories, labels, cities, purchase_places, stores, ingredients_text,
                         traces, serving_size, serving_quantity, nutriscore_score, 
                         nutriscore_grade, main_category, image_url
@@ -67,7 +68,7 @@ def read_import_csv():
             except:
                 print('')  
             #print(values.sort())            
-            query_database_mysql(INSERT, values.sort())
+            query_database_mysql(INSERT, values)
             #mycursor.execute(insert, val)
             #print(len(arr))
 
