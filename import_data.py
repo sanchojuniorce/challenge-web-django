@@ -18,8 +18,8 @@ def query_database_mysql(sql, val):
         database=config['DATABASE']
     )
 
-    val = str(val).replace('}','').replace('{','').replace('[','').replace(']','')
-    print("{} VALUES ({})".format(sql, val))
+    val = str(val).replace('}','),').replace('{','(').replace('[','').replace(']','')
+    print("{} VALUES {}".format(sql, val))
     # cur = connection.cursor()
     # query_database = cur.execute("{} VALUES ({})".format(sql, val))
     # result = cur.fetchone()
@@ -34,40 +34,32 @@ def read_import_csv():
             try:
                 arr = line.decode('UTF-8').split(' ')[0]
 
-                code = verify_code(arr[0:13].split(' '))
-                status = "published"
-                imported_t = datetime.now()
-                url = "https://world.openfoodfacts.org/product/{}".format(code)
-                creator = "securita"
-                created_t = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
-                last_modified_t = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
-                product_name = ' '.join(line.decode('UTF-8').split(' ')[29:35])
-                quantity = ' '.join(line.decode('UTF-8').split(' ')[16::17])
-                brands =  ' '.join(line.decode('UTF-8').split(' ')[21:22])
-                categories = ' '.join(line.decode('UTF-8').split(',')[26:27])
-                labels =  ' '.join(line.decode('UTF-8').split(',')[28:29])
-                cities =  ' '.join(line.decode('UTF-8').split('\t')[50:51][0])
-                purchase_places = ','.join(line.decode('UTF-8').split(',')[33:40])
-                stores = ','.join(line.decode('UTF-8').split(',')[41:42])
-                ingredients_text = ','.join(line.decode('UTF-8').split(',')[80:89])
-                traces = ' '.join(line.decode('UTF-8').split('\t')[50:51][0])
-                serving_size = ' '.join(line.decode('UTF-8').split('\t')[59:60][0])
-                serving_quantity = ''
-                nutriscore_score =  ' '.join(line.decode('UTF-8').split('\t')[103:104])
-                nutriscore_grade = ' '.join(line.decode('UTF-8').split('\t')[104:105])
-                main_category = ' '.join(line.decode('UTF-8').split('\t')[306:307][0])
-                image_url = "https://static.openfoodfacts.org/images/products/{}/front_pt.5.400.jpg".format(code)
-                values.append(
-                    {
-                        code, status, imported_t, url, creator, created_t, last_modified_t, product_name, quantity, brands,
-                        categories, labels, cities, purchase_places, stores, ingredients_text,
-                        traces, serving_size, serving_quantity, nutriscore_score, 
-                        nutriscore_grade, main_category, image_url
-                    }
-                )
+                values = values + [verify_code(arr[0:13].split(' '))]
+                values = values + ["published"]
+                values = values + [datetime.now().strftime("%d/%m/%Y, %H:%M:%S")]
+                values = values + ["https://world.openfoodfacts.org/product/{}".format(code)]
+                values = values + ["securita"]
+                values = values + [datetime.now().strftime("%d/%m/%Y, %H:%M:%S")]
+                values = values + [datetime.now().strftime("%d/%m/%Y, %H:%M:%S")]
+                values = values + [' '.join(line.decode('UTF-8').split(' ')[29:35])]
+                values = values + [' '.join(line.decode('UTF-8').split(' ')[16::17])]
+                values = values + [' '.join(line.decode('UTF-8').split(' ')[21:22])]
+                values = values + [' '.join(line.decode('UTF-8').split(',')[26:27])]
+                values = values + [' '.join(line.decode('UTF-8').split(',')[28:29])]
+                values = values + [' '.join(line.decode('UTF-8').split('\t')[50:51][0])]
+                values = values + [','.join(line.decode('UTF-8').split(',')[33:40])]
+                values = values + [','.join(line.decode('UTF-8').split(',')[41:42])]
+                values = values + [','.join(line.decode('UTF-8').split(',')[80:89])]
+                values = values + [' '.join(line.decode('UTF-8').split('\t')[50:51][0])]
+                values = values + [' '.join(line.decode('UTF-8').split('\t')[59:60][0])]
+                values = values + ['']
+                values = values + [' '.join(line.decode('UTF-8').split('\t')[103:104])]
+                values = values + [' '.join(line.decode('UTF-8').split('\t')[104:105])]
+                values = values + [' '.join(line.decode('UTF-8').split('\t')[306:307][0])]
+                values = values + ["https://static.openfoodfacts.org/images/products/{}/front_pt.5.400.jpg".format(code)]
             except:
                 print('')  
-            #print(values.sort())            
+            #print(values)            
             query_database_mysql(INSERT, values)
             #mycursor.execute(insert, val)
             #print(len(arr))
