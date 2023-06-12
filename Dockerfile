@@ -5,6 +5,7 @@ WORKDIR /challenge_web
 COPY ./requirements.txt /challenge_web/requirements.txt
 RUN pip install -r requirements.txt
 COPY . /challenge_web/
+RUN sudo chown $USER:$USER db -R
 RUN ls -lh ../../
 RUN chown -R $USER:$USER /challenge_web/
 EXPOSE 8000
