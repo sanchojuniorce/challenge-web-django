@@ -1,27 +1,30 @@
 services:
-  db:
-    image: mysql:8
+  mysql_db: 
+    container_name: mysql_db
+    image: mysql:8.0.33
     ports:
       - "3306:3306"
     build: 
       context: ./mymysql
       dockerfile: Dockerfile_mymysql  
     environment:
-      - MYSQL_DATABASE='challenge_web'
-      - MYSQL_USER='root'
-      - MYSQL_PASSWORD='123456'
-      - MYSQL_ROOT_PASSWORD='123456'
-      - MYSQL_HOST=''
-    volumes:
-      - /tmp/app/mysqld:/var/run/mysqld
-      - ./db:/var/lib/mysql
+      - MYSQL_DATABASE=challenge_open_food
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+    - mysql-network  
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
-      - /tmp/app/mysqld:/run/mysqld
-    depends_on:
-      - db
+      - .:/challenge_web
+    links:
+      - mysql_db
+    depends_on: 
+      - mysql_db
+    networks:
+      - mysql-network
+networks:
+  mysql-network:
+    driver: bridge    
