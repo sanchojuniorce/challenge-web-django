@@ -6,8 +6,8 @@ COPY ./requirements.txt /challenge_web/requirements.txt
 RUN pip install -r requirements.txt
 COPY . /challenge_web/
 
-#ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 EXPOSE 8000
 
 # Configure the main process to run when running the image
-CMD ["python", "manage.py", "runserver"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
